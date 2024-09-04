@@ -48,25 +48,33 @@ type LogEntry struct {
 
 func printHTTPLog() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Capture request body
-		var buf bytes.Buffer
-		tee := io.TeeReader(c.Request.Body, &buf)
-		body, _ := io.ReadAll(tee)
-		c.Request.Body = io.NopCloser(&buf)
+		var requestBody string
 
-		// Capture response body
+		// Check if the request body is not nil
+		if c.Request.Body != nil {
+			var buf bytes.Buffer
+			tee := io.TeeReader(c.Request.Body, &buf)
+			body, err := io.ReadAll(tee)
+			if err != nil {
+				fmt.Printf("Error reading request body: %v\n", err)
+			} else {
+				requestBody = string(body)
+				c.Request.Body = io.NopCloser(&buf)
+			}
+		}
+
+		// Capture the response body
 		blw := &bodyLogWriter{body: &bytes.Buffer{}, ResponseWriter: c.Writer}
 		c.Writer = blw
 
 		c.Next()
 
-		// Prepare log entry
 		logEntry := LogEntry{
 			Timestamp:  time.Now().Format("2006-01-02 15:04:05"),
 			Method:     c.Request.Method,
 			URL:        c.Request.URL.String(),
 			StatusCode: c.Writer.Status(),
-			Request:    truncateString(string(body), maxLogLength),
+			Request:    truncateString(requestBody, maxLogLength),
 			Response:   truncateString(blw.body.String(), maxLogLength),
 		}
 

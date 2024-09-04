@@ -1,4 +1,4 @@
-// @Title user.go
+// @Title user_test.go
 // @Description
 // @Author Hunter 2024/9/4 16:10
 
@@ -7,6 +7,7 @@ package service
 import (
 	"errors"
 
+	"github.com/sirupsen/logrus"
 	"go-gin-api-starter/internal/database"
 	"go-gin-api-starter/internal/model"
 	"go-gin-api-starter/internal/repository"
@@ -25,15 +26,18 @@ func NewUserService(userRepo *repository.UserRepository) *UserService {
 func (s *UserService) Login(req *model.LoginRequest) (*model.AuthResponse, error) {
 	user, err := s.userRepo.GetUserByAccountName(req.AccountName)
 	if err != nil {
+		logrus.Errorf("failed to get user by account name: %v", err)
 		return nil, err
 	}
 
 	if user.Password != crypto.Md5(req.Password) {
+		logrus.Errorf("invalid password")
 		return nil, errors.New("invalid password")
 	}
 
 	accessToken, refreshToken, err := auth.GenerateAccessTokenAndRefreshToken(user.ID, database.RDB)
 	if err != nil {
+		logrus.Errorf("failed to generate access token and refresh token: %v", err)
 		return nil, err
 	}
 
@@ -46,12 +50,7 @@ func (s *UserService) Login(req *model.LoginRequest) (*model.AuthResponse, error
 }
 
 func (s *UserService) Logout(userID uint64) error {
-	err := auth.DeleteToken(userID, database.RDB)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return auth.DeleteToken(userID, database.RDB)
 }
 
 func (s *UserService) RefreshToken(refreshToken string) (string, string, error) {

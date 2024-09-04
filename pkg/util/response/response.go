@@ -23,17 +23,17 @@ const (
 	StatusExpireToken         = 50014 // token expired
 )
 
-type customResponse struct {
-	Code    int         `json:"code"`
-	Message string      `json:"message,omitempty"`
-	Data    interface{} `json:"data,omitempty"`
+type CustomResponse[T any] struct {
+	Code    int    `json:"code"`
+	Message string `json:"message,omitempty"`
+	Data    T      `json:"data,omitempty"`
 }
 
 // Data sends a successful response with the provided data
 // @param c *gin.Context
 // @param data interface{} - The data to be returned in the response
-func Data(c *gin.Context, data interface{}) {
-	c.JSON(http.StatusOK, customResponse{
+func Data[T any](c *gin.Context, data T) {
+	c.JSON(http.StatusOK, CustomResponse[T]{
 		Code: StatusOK,
 		Data: data,
 	})
@@ -43,9 +43,10 @@ func Data(c *gin.Context, data interface{}) {
 // @param c *gin.Context
 // @param message string - The error message to be returned
 func Error(c *gin.Context, message string) {
-	c.JSON(http.StatusOK, customResponse{
+	c.JSON(http.StatusOK, CustomResponse[string]{
 		Code:    StatusErr,
 		Message: message,
+		Data:    "",
 	})
 }
 
@@ -63,8 +64,9 @@ func Code(c *gin.Context, code int) {
 		StatusExpireToken:  "Token Expired",
 	}
 
-	c.JSON(http.StatusOK, customResponse{
+	c.JSON(http.StatusOK, CustomResponse[string]{
 		Code:    code,
 		Message: codeMap[code],
+		Data:    "",
 	})
 }

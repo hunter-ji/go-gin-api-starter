@@ -7,6 +7,8 @@ package middleware
 import (
 	"fmt"
 	"net/http"
+	"slices"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"go-gin-api-starter/config"
@@ -20,10 +22,6 @@ const (
 	ErrMsgExpiredToken = "expired token"
 )
 
-type QueryToken struct {
-	Token string `form:"token" binding:"required"`
-}
-
 // isItOnTheWhiteList
 // @Description: checks if the request path and method are in the whitelist
 // @param path request path
@@ -31,7 +29,14 @@ type QueryToken struct {
 // @return bool true if in whitelist, false otherwise
 func isItOnTheWhiteList(path, method string) bool {
 	if allowedMethod, ok := config.RouterWhiteList[path]; ok {
-		return allowedMethod == "*" || allowedMethod == method
+		if allowedMethod == "*" {
+			return true
+		}
+
+		allowedMethods := strings.Split(allowedMethod, ",")
+		if slices.Contains(allowedMethods, method) {
+			return true
+		}
 	}
 	return false
 }
@@ -57,12 +62,25 @@ func respondWithError(c *gin.Context, statusCode int, message string) {
 // @return bool true if token is expired
 // @return error
 func validateToken(c *gin.Context) (*ContextUserInfo, string, bool, error) {
-	var queryToken QueryToken
-	if err := c.ShouldBindQuery(&queryToken); err != nil {
-		return nil, "", false, fmt.Errorf("invalid token")
+	// Get the Authorization header
+	authHeader := c.GetHeader("Authorization")
+
+	fmt.Printf("authHeader: %s\n", authHeader)
+
+	// Check if the header is empty
+	if authHeader == "" {
+		return nil, "", false, fmt.Errorf("failed to get access token")
 	}
 
-	claims, newAccessToken, expired, err := auth.ValidateAccessTokenAndRefresh(queryToken.Token, database.RDB)
+	// Check if the token starts with "Bearer "
+	if !strings.HasPrefix(authHeader, "Bearer ") {
+		return nil, "", false, fmt.Errorf("invalid access token")
+	}
+
+	// remove prefix
+	token := strings.TrimPrefix(authHeader, "Bearer ")
+
+	claims, newAccessToken, expired, err := auth.ValidateAccessTokenAndRefresh(token, database.RDB)
 	if err != nil {
 		return nil, "", expired, err
 	}
@@ -86,13 +104,9 @@ func authorize() gin.HandlerFunc {
 
 		// Check if request is in whitelist
 		if !isItOnTheWhiteList(c.Request.URL.Path, c.Request.Method) {
-			userInfo, newAccessToken, expired, err := validateToken(c)
+			userInfo, newAccessToken, _, err := validateToken(c)
 			if err != nil {
-				if expired {
-					respondWithError(c, response.StatusExpireToken, ErrMsgExpiredToken)
-				} else {
-					respondWithError(c, response.StatusUnauthorized, ErrMsgUnauthorized)
-				}
+				respondWithError(c, response.StatusUnauthorized, ErrMsgUnauthorized)
 				return
 			}
 

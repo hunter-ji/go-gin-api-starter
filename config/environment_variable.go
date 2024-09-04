@@ -7,6 +7,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/joho/godotenv"
@@ -48,12 +49,17 @@ func init() {
 		NodeEnv = env
 	}
 
-	envFile := fmt.Sprintf(".env.%s", NodeEnv)
+	projectRoot, err := findProjectRoot()
+	if err != nil {
+		panic(fmt.Errorf("failed to find project root: %w", err))
+	}
 
-	fmt.Printf("Load env file: %s\n", envFile)
+	envFile := filepath.Join(projectRoot, fmt.Sprintf(".env.%s", NodeEnv))
+
+	fmt.Printf("Loading env file: %s\n", envFile)
 
 	if err := godotenv.Load(envFile); err != nil {
-		panic(err)
+		panic(fmt.Errorf("failed to load env file: %w", err))
 	}
 
 	// Token
@@ -83,4 +89,23 @@ func init() {
 		MessageQueueConfig.JobExchangeName = os.Getenv("MESSAGE_QUEUE_JOB_EXCHANGE_NAME")
 		MessageQueueConfig.JobExchangeType = os.Getenv("MESSAGE_QUEUE_JOB_EXCHANGE_TYPE")
 	*/
+}
+
+func findProjectRoot() (string, error) {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir, nil
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", fmt.Errorf("could not find go.mod file")
+		}
+		dir = parent
+	}
 }

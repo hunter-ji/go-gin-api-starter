@@ -1,4 +1,4 @@
-// @Title user.go
+// @Title user_test.go
 // @Description
 // @Author Hunter 2024/9/4 15:57
 
@@ -19,8 +19,12 @@ type User struct {
 	IsDeleted   soft_delete.DeletedAt `json:"-" gorm:"column:is_deleted;softDelete:flag"`
 }
 
+func (u User) TableName() string {
+	return "app_user"
+}
+
 type LoginRequest struct {
-	AccountName string `json:"account_name" binding:"required,max=255"`
+	AccountName string `json:"accountName" binding:"required,max=255"`
 	Password    string `json:"password" binding:"required,max=255"`
 }
 

@@ -9,9 +9,20 @@ import (
 	api "go-gin-api-starter/internal/api/handler"
 	v1 "go-gin-api-starter/internal/api/v1"
 	"go-gin-api-starter/internal/database"
+	"go-gin-api-starter/internal/middleware"
 	"go-gin-api-starter/internal/repository"
 	"go-gin-api-starter/internal/service"
 )
+
+func SetUpRouter() *gin.Engine {
+	r := gin.Default()
+
+	middleware.SetupMiddleware(r)
+
+	LoadRouter(r)
+
+	return r
+}
 
 func LoadRouter(e *gin.Engine) {
 	r := e.Group("/api")

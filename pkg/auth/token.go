@@ -108,13 +108,17 @@ func validateToken(tokenString string, secret []byte) (*Claims, bool, error) {
 	return nil, false, jwt.ErrSignatureInvalid
 }
 
+func generateRefreshTokenStoreKey(userID uint64) string {
+	return fmt.Sprintf("%s-refresh-token:%d", config.CommonSplicePrefix, userID)
+}
+
 func storeRefreshToken(userID uint64, refreshToken string, redisClient *redis.Client) error {
-	key := fmt.Sprintf("%s-refresh-token:%d", config.CommonSplicePrefix, userID)
+	key := generateRefreshTokenStoreKey(userID)
 	return redisClient.Set(context.Background(), key, refreshToken, 15*24*time.Hour).Err()
 }
 
 func validateStoredRefreshToken(userID uint64, refreshToken string, redisClient *redis.Client) bool {
-	key := fmt.Sprintf("%s-refresh-token:%d", config.CommonSplicePrefix, userID)
+	key := generateRefreshTokenStoreKey(userID)
 	storedToken, err := redisClient.Get(context.Background(), key).Result()
 	if err != nil {
 		return false
@@ -123,7 +127,9 @@ func validateStoredRefreshToken(userID uint64, refreshToken string, redisClient 
 }
 
 func deleteRefreshToken(userID uint64, redisClient *redis.Client) error {
-	key := fmt.Sprintf("%s-refresh-token:%d", config.CommonSplicePrefix, userID)
+	key := generateRefreshTokenStoreKey(userID)
+	fmt.Printf("key: %s\n", key)
+	redisClient.Del(context.Background(), key)
 	return redisClient.Del(context.Background(), key).Err()
 }
 
@@ -272,10 +278,7 @@ func RefreshToken(refreshToken string, redisClient *redis.Client) (string, strin
 // @param redisClient
 // @return error
 func DeleteToken(userID uint64, redisClient *redis.Client) error {
-	if err := deleteRefreshToken(userID, redisClient); err != nil {
-		return err
-	}
-	return nil
+	return deleteRefreshToken(userID, redisClient)
 }
 
 func getTokenFromCache(userID uint64) (cachedToken, bool) {

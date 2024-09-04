@@ -1,4 +1,4 @@
-// @Title user.go
+// @Title user_test.go
 // @Description
 // @Author Hunter 2024/9/4 16:10
 
@@ -6,6 +6,7 @@ package v1
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"go-gin-api-starter/internal/middleware"
 	"go-gin-api-starter/internal/model"
 	"go-gin-api-starter/internal/service"
@@ -39,12 +40,14 @@ func (h *UserHandler) Login(c *gin.Context) {
 func (h *UserHandler) Logout(c *gin.Context) {
 	userinfo, _, err := middleware.GetContextUserInfo(c)
 	if err != nil {
+		logrus.Errorf("failed to get userinfo: %v\n", err)
 		response.Error(c, "get userinfo failed")
 		return
 	}
 
 	err = h.userService.Logout(userinfo.UserID)
 	if err != nil {
+		logrus.Errorf("failed to logout: %v\n", err)
 		response.Error(c, "logout failed")
 		return
 	}
@@ -91,6 +94,7 @@ func (h *UserHandler) GetUserInfo(c *gin.Context) {
 
 	resp, err := h.userService.GetUserByID(userinfo.UserID)
 	if err != nil {
+		logrus.Errorf("failed to get user info: %v", err)
 		response.Error(c, "get user info failed")
 		return
 	}

@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"go-gin-api-starter/internal/api"
 	"go-gin-api-starter/internal/database"
-	"go-gin-api-starter/internal/middleware"
 	"go-gin-api-starter/pkg/util/customBindValidator"
 )
 
@@ -40,10 +39,7 @@ func run() error {
 }
 
 func configureGinEngine() *gin.Engine {
-	r := gin.Default()
-
-	middleware.SetupMiddleware(r)
-	api.LoadRouter(r)
+	r := api.SetUpRouter()
 
 	if err := customBindValidator.Register(); err != nil {
 		log.Fatalf("Failed to register custom validator: %v", err)
