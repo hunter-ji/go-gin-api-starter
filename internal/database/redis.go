@@ -14,41 +14,41 @@ import (
 )
 
 var (
-	rdbServer, rdbPort, rdbPassword string
-	rdbDB                           int
-	RDB                             *redis.Client
+	RDB                           *redis.Client
+	rdbHost, rdbPort, rdbPassword string
+	rdbDB                         int
 )
 
 func init() {
-	rdbServer = config.RedisConfig.Server
+	rdbHost = config.RedisConfig.Host
 	rdbPort = config.RedisConfig.Port
 	rdbPassword = config.RedisConfig.Password
 	rdbDB = config.RedisConfig.DB
 
-	RDB = RedisConnect()
+	fmt.Printf("Redis: %s:%s\n\n", rdbHost, rdbPort)
 
-	fmt.Printf("Redis: %s:%s\n\n", rdbServer, rdbPort)
+	RedisConnect()
 }
 
 // RedisConnect
 // Description: Connect to Redis database and return the client
 // @return rdb Connection client
-func RedisConnect() (rdb *redis.Client) {
-	rdb = redis.NewClient(&redis.Options{
-		Addr:     fmt.Sprintf("%s:%s", rdbServer, rdbPort),
+func RedisConnect() {
+	RDB = redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%s", rdbHost, rdbPort),
 		Password: rdbPassword,
 		DB:       rdbDB,
 	})
+}
 
-	// Test the connection
+func preDetectRedis() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := rdb.Ping(ctx).Result()
+	_, err := RDB.Ping(ctx).Result()
 	if err != nil {
-		fmt.Printf("Failed to connect to Redis: %v\n", err)
-		return nil
+		return err
 	}
 
-	return
+	return nil
 }

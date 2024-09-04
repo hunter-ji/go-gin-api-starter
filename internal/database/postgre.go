@@ -6,7 +6,6 @@ package database
 
 import (
 	"fmt"
-	"sync"
 	"time"
 
 	"go-gin-api-starter/config"
@@ -17,9 +16,7 @@ import (
 )
 
 var (
-	ormDB   *gorm.DB
-	ormOnce sync.Once
-
+	DB                                         *gorm.DB
 	dbHost, dbPort, dbUser, dbPassword, dbName string
 )
 
@@ -31,36 +28,46 @@ func init() {
 	dbName = config.DBConfig.DBName
 
 	fmt.Printf("Database: %s@%s:%s\n", dbUser, dbHost, dbPort)
+
+	// initDB()
 }
 
-// GetDB returns a singleton instance of the database connection
-func GetDB() *gorm.DB {
-	ormOnce.Do(func() {
-		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Shanghai",
-			dbHost, dbUser, dbPassword, dbName, dbPort)
-		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Info),
-			NamingStrategy: schema.NamingStrategy{
-				SingularTable: true,
-				NoLowerCase:   true,
-			},
-		})
-
-		if err != nil {
-			panic(fmt.Errorf("failed to connect to PostgreSQL: %v", err))
-		}
-		ormDB = db
-
-		sqlDB, err := ormDB.DB()
-		if err != nil {
-			panic(fmt.Errorf("failed to get underlying *sql.DB: %v", err))
-		}
-
-		// Configure connection pool
-		sqlDB.SetMaxIdleConns(10)
-		sqlDB.SetMaxOpenConns(100)
-		sqlDB.SetConnMaxLifetime(time.Hour)
+func initDB() {
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Shanghai",
+		dbHost, dbUser, dbPassword, dbName, dbPort)
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Info),
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+			NoLowerCase:   true,
+		},
 	})
 
-	return ormDB
+	if err != nil {
+		panic(fmt.Errorf("failed to connect to PostgreSQL: %v", err))
+	}
+	DB = db
+
+	sqlDB, err := DB.DB()
+	if err != nil {
+		panic(fmt.Errorf("failed to get underlying *sql.DB: %v", err))
+	}
+
+	// Configure connection pool
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+}
+
+func preDetectPostgres() error {
+	d, err := DB.DB()
+	if err != nil {
+		return err
+	}
+
+	if err := d.Ping(); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -5,38 +5,56 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"go-gin-api-starter/config"
 	"go-gin-api-starter/internal/api"
+	"go-gin-api-starter/internal/database"
+	"go-gin-api-starter/internal/middleware"
 	"go-gin-api-starter/pkg/util/customBindValidator"
 )
 
+const defaultPort = "9000"
+
 func main() {
-	err := config.Load()
-	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
+	if err := run(); err != nil {
+		log.Fatalf("Application failed to start: %v", err)
+	}
+}
+
+func run() error {
+	// Pre-detect database
+	if err := database.PreDetectDatabase(); err != nil {
+		return fmt.Errorf("failed to pre-detect database: %w", err)
 	}
 
-	// get port from environment variable, or use default port 9000
-	var port string
-	if value, ok := os.LookupEnv("NODE_PORT"); ok {
-		port = value
-	} else {
-		port = "9000"
-	}
+	// Initialize router
+	r := configureGinEngine()
 
+	// Start server
+	port := getPort()
+	log.Printf("Starting server on port %s", port)
+	return r.Run("0.0.0.0:" + port)
+}
+
+func configureGinEngine() *gin.Engine {
 	r := gin.Default()
 
-	// load router
+	middleware.SetupMiddleware(r)
 	api.LoadRouter(r)
 
-	// register custom validator
 	if err := customBindValidator.Register(); err != nil {
-		os.Exit(1)
+		log.Fatalf("Failed to register custom validator: %v", err)
 	}
 
-	_ = r.Run("0.0.0.0:" + port)
+	return r
+}
+
+func getPort() string {
+	if port, exists := os.LookupEnv("NODE_PORT"); exists {
+		return port
+	}
+	return defaultPort
 }

@@ -4,11 +4,14 @@ go 1.23.0
 
 require (
 	github.com/bwmarrin/snowflake v0.3.0
+	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/go-redis/redis/v8 v8.11.5
+	github.com/go-redis/redis_rate/v9 v9.1.2
 	github.com/joho/godotenv v1.5.1
 	github.com/mileusna/useragent v1.3.4
+	github.com/sanity-io/litter v1.5.5
 	github.com/sirupsen/logrus v1.9.3
 	github.com/streadway/amqp v1.1.0
 	gorm.io/driver/postgres v1.5.9

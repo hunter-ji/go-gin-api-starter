@@ -25,6 +25,6 @@ vendor/
 .vscode/
 
 # Environment variables file
-# .env
-# .env.*
-
+.env
+.env.development
+.env.production

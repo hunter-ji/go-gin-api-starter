@@ -2,7 +2,7 @@
 // @Description
 // @Author Hunter 2024/9/3 18:36
 
-package handler
+package api
 
 import (
 	"net/http"
@@ -12,4 +12,5 @@ import (
 
 func Ping(c *gin.Context) {
 	c.String(http.StatusOK, "pong")
+	return
 }

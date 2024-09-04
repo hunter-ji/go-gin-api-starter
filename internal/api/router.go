@@ -6,9 +6,9 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"go-gin-api-starter/internal/handler"
+	api "go-gin-api-starter/internal/api/handler"
 )
 
 func LoadRouter(e *gin.Engine) {
-	e.GET("/ping", handler.Ping)
+	e.GET("/ping", api.Ping)
 }
