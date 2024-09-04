@@ -9,6 +9,7 @@ require (
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-redis/redis_rate/v9 v9.1.2
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/joho/godotenv v1.5.1
 	github.com/mileusna/useragent v1.3.4
 	github.com/sanity-io/litter v1.5.5
@@ -16,6 +17,7 @@ require (
 	github.com/streadway/amqp v1.1.0
 	gorm.io/driver/postgres v1.5.9
 	gorm.io/gorm v1.25.11
+	gorm.io/plugin/soft_delete v1.2.1
 )
 
 require (

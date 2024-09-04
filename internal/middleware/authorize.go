@@ -9,14 +9,15 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
 	"go-gin-api-starter/config"
 	"go-gin-api-starter/internal/database"
+	"go-gin-api-starter/pkg/auth"
 	"go-gin-api-starter/pkg/util/response"
 )
 
 const (
 	ErrMsgUnauthorized = "unauthorized access"
+	ErrMsgExpiredToken = "expired token"
 )
 
 type QueryToken struct {
@@ -52,28 +53,24 @@ func respondWithError(c *gin.Context, statusCode int, message string) {
 // @param c gin context
 // @param rdb Redis client
 // @return *ContextUserInfo user info if token is valid
+// @return string new access token if token is expired
+// @return bool true if token is expired
 // @return error
-func validateToken(c *gin.Context, rdb *redis.Client) (*ContextUserInfo, error) {
+func validateToken(c *gin.Context) (*ContextUserInfo, string, bool, error) {
 	var queryToken QueryToken
 	if err := c.ShouldBindQuery(&queryToken); err != nil {
-		return nil, fmt.Errorf("invalid token")
+		return nil, "", false, fmt.Errorf("invalid token")
 	}
 
-	assembledToken := fmt.Sprintf("%s-auth:%s", config.CommonSplicePrefix, queryToken.Token)
-
-	// Check if token exists in Redis
-	exists, err := rdb.Exists(c, assembledToken).Result()
-	if err != nil || exists == 0 {
-		return nil, fmt.Errorf("token not found")
+	claims, newAccessToken, expired, err := auth.ValidateAccessTokenAndRefresh(queryToken.Token, database.RDB)
+	if err != nil {
+		return nil, "", expired, err
 	}
 
-	// Get user info from Redis
 	var userInfo ContextUserInfo
-	if err := rdb.HGetAll(c, assembledToken).Scan(&userInfo); err != nil {
-		return nil, fmt.Errorf("failed to get user info")
-	}
+	userInfo.UserID = claims.UserID
 
-	return &userInfo, nil
+	return &userInfo, newAccessToken, false, nil
 }
 
 // authorize
@@ -89,10 +86,19 @@ func authorize() gin.HandlerFunc {
 
 		// Check if request is in whitelist
 		if !isItOnTheWhiteList(c.Request.URL.Path, c.Request.Method) {
-			userInfo, err := validateToken(c, database.RDB)
+			userInfo, newAccessToken, expired, err := validateToken(c)
 			if err != nil {
-				respondWithError(c, response.StatusUnauthorized, ErrMsgUnauthorized)
+				if expired {
+					respondWithError(c, response.StatusExpireToken, ErrMsgExpiredToken)
+				} else {
+					respondWithError(c, response.StatusUnauthorized, ErrMsgUnauthorized)
+				}
 				return
+			}
+
+			// Set new access token in header only if access token is expired
+			if newAccessToken != "" {
+				c.Header("Authorization", newAccessToken)
 			}
 
 			// Set user info in context

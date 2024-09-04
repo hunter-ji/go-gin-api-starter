@@ -9,9 +9,9 @@ import (
 )
 
 func PreDetectDatabase() error {
-	// if err := preDetectPostgres(); err != nil {
-	// 	return err
-	// }
+	if err := preDetectPostgres(); err != nil {
+		return err
+	}
 
 	if err := preDetectRedis(); err != nil {
 		return err

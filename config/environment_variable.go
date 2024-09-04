@@ -15,6 +15,11 @@ import (
 // NodeEnv current running environment
 var NodeEnv = Development
 
+var TokenConfig struct {
+	AccessTokenSecret  string
+	RefreshTokenSecret string
+}
+
 var DBConfig struct {
 	Host     string
 	Port     string
@@ -50,6 +55,10 @@ func init() {
 	if err := godotenv.Load(envFile); err != nil {
 		panic(err)
 	}
+
+	// Token
+	TokenConfig.AccessTokenSecret = os.Getenv("ACCESS_TOKEN_SECRET")
+	TokenConfig.RefreshTokenSecret = os.Getenv("REFRESH_TOKEN_SECRET")
 
 	// DB
 	DBConfig.Host = os.Getenv("DB_HOST")

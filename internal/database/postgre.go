@@ -29,7 +29,7 @@ func init() {
 
 	fmt.Printf("Database: %s@%s:%s\n", dbUser, dbHost, dbPort)
 
-	// initDB()
+	initDB()
 }
 
 func initDB() {
