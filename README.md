@@ -1,18 +1,18 @@
 # go-gin-api-starter
 
-English | [中文](https://github.com/hunter-ji/go-gin-api-starter/blob/main/doc/README.zh-CN.md)
+English | [简体中文](https://github.com/hunter-ji/go-gin-api-starter/blob/main/doc/README.zh-CN.md)
 
-## Project Introduction
+## 📚 Project Introduction
 
 go-gin-api-starter is a RESTful API project starter based on the Gin framework. It helps developers quickly build and
 start scalable Go backend services. This starter template focusing on API development. It provides a clear and easy project base.
 
-You can also check out other templates I've put together:
+You can also check out my other templates:
 
 - Frontend template: [vue-ts-tailwind-vite-starter](https://github.com/hunter-ji/vue-ts-tailwind-vite-starter)
 - Database template: [postgres-redis-dev-docker-compose](https://github.com/hunter-ji/postgres-redis-dev-docker-compose)
 
-## Project Features
+## ✨ Project Features
 
 - **Gin Framework**: Uses Gin's high performance and flexibility to quickly build RESTful APIs.
 - **MVC**: Uses MVC design to make code easier to maintain and test.
@@ -28,7 +28,7 @@ You can also check out other templates I've put together:
 - **Enhanced Dev Mode Logging**: In dev mode, automatically prints detailed HTTP request and response info, greatly
   helping API debugging and development.
 
-## Quick Start
+## 🚀 Quick Start
 
 Follow these steps to quickly set up and run your project:
 
@@ -137,7 +137,7 @@ http://localhost:9000/api/ping
 
 If all is well, you should see a "pong" response.
 
-## Project Structure
+## 🏗️ Project Structure
 
 ### `/cmd`
 
@@ -196,7 +196,7 @@ Additional external test apps and test data.
 - `Makefile`: Makefile defining common commands.
 - `project_bootstrap.sh`: Project init script.
 
-## Running Tests
+## 🧪 Running Tests
 
 This project offers various ways to run tests for different testing needs.
 
@@ -240,7 +240,7 @@ make test-folder-verbose
 make test-file-verbose FILE=./test/user_test.go 
 ```
 
-## Switching Run Environments
+## 🔄 Switching Run Environments
 
 The project relies on the `NODE_ENV` environment variable to switch environments. If not set, it defaults to
 `development`.
@@ -248,7 +248,7 @@ The project loads different config files based on the environment, like `.env.de
 `.env.production`, etc.
 Just create a new `.env` file and set the `NODE_ENV` variable.
 
-## More Usage Methods
+## 📖 More Usage Methods
 
 For more usage methods, you can refer to:
 
@@ -258,7 +258,7 @@ For more usage methods, you can refer to:
 
 The documentation will be continuously updated and improved in the future.
 
-## Frequently Asked Questions (FAQ)
+## ❓ Frequently Asked Questions (FAQ)
 
 ### Q1: How to change the default server port?
 
@@ -308,7 +308,7 @@ A: Add new validation functions in the `pkg/util/formatValidator` directory, the
 
 A: Yes, the project has CORS middleware configured by default.
 
-## Author's Note
+## 💬 Author's Note
 
 In recent years when writing Go projects, I summarized a template for myself. When developing new projects recently, I
 found some shortcomings and areas that were not fully improved before, which I hadn't systematically updated and

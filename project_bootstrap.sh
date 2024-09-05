@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OLD_PROJECT_NAME="Template"
+OLD_PROJECT_NAME="go-gin-api-starter"
 
 BOLD='\033[1m'
 GREEN='\033[0;32m'

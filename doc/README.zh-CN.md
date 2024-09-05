@@ -1,17 +1,17 @@
 # go-gin-api-starter
 
-[English](https://github.com/hunter-ji/go-gin-api-starter) | 中文
+[English](https://github.com/hunter-ji/go-gin-api-starter) | 简体中文
 
-## 项目介绍
+## 📚 项目介绍
 
 go-gin-api-starter是一个基于Gin框架的RESTful API项目模板，旨在帮助开发者快速构建和启动高效、可扩展的Go后端服务。这个模板采用了MVC架构的变体，专注于API开发，提供了一个结构清晰、易于扩展的项目基础。
 
-如果你有兴趣，也可以看看我整理的别的模板：
+如果你有兴趣，也可以看看我的其它模板：
 
 - 前端模板：[vue-ts-tailwind-vite-starter](https://github.com/hunter-ji/vue-ts-tailwind-vite-starter)
 - 数据库模板：[postgres-redis-dev-docker-compose](https://github.com/hunter-ji/postgres-redis-dev-docker-compose)
 
-## 项目特性
+## ✨ 项目特性
 
 - **Gin 框架**: 利用Gin的高性能和灵活性，快速构建RESTful API。
 - **MVC 架构**: 采用MVC的设计理念，实现关注点分离，提高代码的可维护性和可测试性。
@@ -26,7 +26,7 @@ go-gin-api-starter是一个基于Gin框架的RESTful API项目模板，旨在帮
 - **用户模块**: 预置用户模块及其测试代码，为快速开发提供参考和基础。
 - **API 版本控制**: 内置API版本控制机制，便于管理不同版本的API。
 
-## 快速开始
+## 🚀 快速开始
 
 按照以下步骤快速设置和运行您的项目：
 
@@ -134,7 +134,7 @@ http://localhost:9000/api/ping
 
 如果一切正常，应该看到 "pong" 响应。
 
-## 项目结构
+## 🏗️ 项目结构
 
 ### `/cmd`
 
@@ -193,7 +193,7 @@ http://localhost:9000/api/ping
 - `Makefile`: 定义常用命令的 Makefile。
 - `project_bootstrap.sh`: 项目初始化脚本。
 
-## 运行测试
+## 🧪 运行测试
 
 本项目提供了多种运行测试的方式，以满足不同的测试需求。
 
@@ -237,13 +237,13 @@ make test-folder-verbose
 make test-file-verbose FILE=./test/user_test.go 
 ```
 
-## 切换运行环境
+## 🔄 切换运行环境
 
 项目依赖于环境变量 `NODE_ENV` 来切换环境，不设置默认为 `development`。
 项目会根据不同的环境加载不同的配置文件，如 `.env.development`、`.env.test`、`.env.production` 等。
 只需创建一个新的 `.env` 文件，然后设置 `NODE_ENV` 变量即可。
 
-## 更多使用方法
+## 📖 更多使用方法
 
 更多使用方法可以参考：
 
@@ -253,7 +253,7 @@ make test-file-verbose FILE=./test/user_test.go
 
 后续将会持续更新和完善文档。
 
-## 常见问题 (FAQ)
+## ❓ 常见问题 (FAQ)
 
 ### Q1: 如何更改默认的服务器端口？
 
@@ -296,7 +296,7 @@ A: 在 `pkg/util/formatValidator` 目录下添加新的验证函数，然后在 
 
 A: 是的，项目默认配置了 CORS 中间件。
 
-## 作者的话
+## 💬 作者留言
 
 前些年写Go项目的时候，自己总结了一个模板，最近开发新的项目，发现了一些不足，以及之前还有些不够完善的地方，一直没有系统地去更新和完善。
 这次就直接从头开始，重新整理了一下，不仅便利了自己，还希望也能有机会帮到别的开发者。
