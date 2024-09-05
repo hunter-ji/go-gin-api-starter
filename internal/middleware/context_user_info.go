@@ -1,5 +1,5 @@
 // @Title context_user_info.go
-// @Description
+// @Description Get userinfo from context and format it.
 // @Author Hunter 2024/9/4 10:42
 
 package middleware
@@ -13,7 +13,7 @@ import (
 // ContextUserInfo
 // @Description: userinfo in context, update the fields according to the actual project
 type ContextUserInfo struct {
-	UserID uint64 `redis:"id"`
+	UserID uint64
 }
 
 // GetContextUserInfo

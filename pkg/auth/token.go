@@ -1,5 +1,7 @@
 // @Title token.go
-// @Description
+// @Description Use jwt as token, provide access token and refresh token generation.
+// 				And encapsulate cache storage for refresh token, directly call to generate token and verify.
+// 				Everything will be simple.
 // @Author Hunter 2024/9/4 16:48
 
 package auth
@@ -19,8 +21,12 @@ import (
 var (
 	accessTokenSecret  []byte
 	refreshTokenSecret []byte
-	refreshMutexes     sync.Map
-	tokenCache         sync.Map
+
+	refreshMutexes sync.Map
+	tokenCache     sync.Map
+
+	accessTokenExpire  = 10 * 24 * time.Hour
+	refreshTokenExpire = 15 * 24 * time.Hour
 )
 
 type cachedToken struct {
@@ -45,7 +51,7 @@ type Claims struct {
 // @return string access token
 // @return error
 func GenerateAccessToken(userID uint64) (string, error) {
-	expirationTime := time.Now().Add(10 * 24 * time.Hour)
+	expirationTime := time.Now().Add(accessTokenExpire)
 	claims := &Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -60,7 +66,7 @@ func GenerateAccessToken(userID uint64) (string, error) {
 }
 
 func generateRefreshToken(userID uint64) (string, error) {
-	expirationTime := time.Now().Add(15 * 24 * time.Hour)
+	expirationTime := time.Now().Add(refreshTokenExpire)
 	claims := &Claims{
 		UserID: userID,
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -114,7 +120,7 @@ func generateRefreshTokenStoreKey(userID uint64) string {
 
 func storeRefreshToken(userID uint64, refreshToken string, redisClient *redis.Client) error {
 	key := generateRefreshTokenStoreKey(userID)
-	return redisClient.Set(context.Background(), key, refreshToken, 15*24*time.Hour).Err()
+	return redisClient.Set(context.Background(), key, refreshToken, refreshTokenExpire).Err()
 }
 
 func validateStoredRefreshToken(userID uint64, refreshToken string, redisClient *redis.Client) bool {

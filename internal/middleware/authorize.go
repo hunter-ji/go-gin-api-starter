@@ -1,5 +1,5 @@
 // @Title authorize.go
-// @Description
+// @Description Middleware for access control, checks whitelist and validates token. And the middleware will put the user info in the context.
 // @Author Hunter 2024/9/4 10:41
 
 package middleware
@@ -54,7 +54,7 @@ func respondWithError(c *gin.Context, statusCode int, message string) {
 }
 
 // validateToken
-// @Description: checks the token and gets user info from Redis
+// @Description: checks the token and gets user info from jwt
 // @param c gin context
 // @param rdb Redis client
 // @return *ContextUserInfo user info if token is valid
