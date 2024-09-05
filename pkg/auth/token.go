@@ -35,14 +35,20 @@ type cachedToken struct {
 	expiry       time.Time
 }
 
+type Claims struct {
+	ContextUserInfo
+	jwt.RegisteredClaims
+}
+
+// ContextUserInfo
+// @Description: user info in claims and context, update it when needed
+type ContextUserInfo struct {
+	UserID uint64 `json:"userID"`
+}
+
 func init() {
 	accessTokenSecret = []byte(config.TokenConfig.AccessTokenSecret)
 	refreshTokenSecret = []byte(config.TokenConfig.RefreshTokenSecret)
-}
-
-type Claims struct {
-	UserID uint64 `json:"userID"`
-	jwt.RegisteredClaims
 }
 
 // GenerateAccessToken
@@ -50,10 +56,10 @@ type Claims struct {
 // @param userID uint64
 // @return string access token
 // @return error
-func GenerateAccessToken(userID uint64) (string, error) {
+func GenerateAccessToken(userinfo ContextUserInfo) (string, error) {
 	expirationTime := time.Now().Add(accessTokenExpire)
 	claims := &Claims{
-		UserID: userID,
+		ContextUserInfo: userinfo,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -65,10 +71,10 @@ func GenerateAccessToken(userID uint64) (string, error) {
 	return token.SignedString(accessTokenSecret)
 }
 
-func generateRefreshToken(userID uint64) (string, error) {
+func generateRefreshToken(userinfo ContextUserInfo) (string, error) {
 	expirationTime := time.Now().Add(refreshTokenExpire)
 	claims := &Claims{
-		UserID: userID,
+		ContextUserInfo: userinfo,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -134,7 +140,6 @@ func validateStoredRefreshToken(userID uint64, refreshToken string, redisClient 
 
 func deleteRefreshToken(userID uint64, redisClient *redis.Client) error {
 	key := generateRefreshTokenStoreKey(userID)
-	fmt.Printf("key: %s\n", key)
 	redisClient.Del(context.Background(), key)
 	return redisClient.Del(context.Background(), key).Err()
 }
@@ -146,21 +151,21 @@ func deleteRefreshToken(userID uint64, redisClient *redis.Client) error {
 // @return string access token
 // @return string refresh token
 // @return error
-func GenerateAccessTokenAndRefreshToken(userID uint64, redisClient *redis.Client) (string, string, error) {
+func GenerateAccessTokenAndRefreshToken(userinfo ContextUserInfo, redisClient *redis.Client) (string, string, error) {
 	// Generate new access token
-	newAccessToken, err := GenerateAccessToken(userID)
+	newAccessToken, err := GenerateAccessToken(userinfo)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to generate new access token: %w", err)
 	}
 
 	// Generate new refresh token
-	newRefreshToken, err := generateRefreshToken(userID)
+	newRefreshToken, err := generateRefreshToken(userinfo)
 	if err != nil {
 		return "", "", fmt.Errorf("failed to generate new refresh token: %w", err)
 	}
 
 	// Store new refresh token
-	if err := storeRefreshToken(userID, newRefreshToken, redisClient); err != nil {
+	if err := storeRefreshToken(userinfo.UserID, newRefreshToken, redisClient); err != nil {
 		return "", "", fmt.Errorf("failed to store new refresh token: %w", err)
 	}
 
@@ -218,7 +223,7 @@ func ValidateAccessTokenAndRefresh(accessToken string, redisClient *redis.Client
 	}
 
 	// Generate new tokens
-	newAccessToken, _, err := GenerateAccessTokenAndRefreshToken(userID, redisClient)
+	newAccessToken, _, err := GenerateAccessTokenAndRefreshToken(claims.ContextUserInfo, redisClient)
 	if err != nil {
 		return nil, "", false, err
 	}
@@ -267,7 +272,7 @@ func RefreshToken(refreshToken string, redisClient *redis.Client) (string, strin
 	}
 
 	// Generate new tokens
-	newAccessToken, newRefreshToken, err := GenerateAccessTokenAndRefreshToken(userID, redisClient)
+	newAccessToken, newRefreshToken, err := GenerateAccessTokenAndRefreshToken(claims.ContextUserInfo, redisClient)
 	if err != nil {
 		return "", "", err
 	}

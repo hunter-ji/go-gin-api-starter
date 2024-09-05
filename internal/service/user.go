@@ -35,7 +35,11 @@ func (s *UserService) Login(req *model.LoginRequest) (*model.AuthResponse, error
 		return nil, errors.New("invalid password")
 	}
 
-	accessToken, refreshToken, err := auth.GenerateAccessTokenAndRefreshToken(user.ID, database.RDB)
+	contextUserInfo := auth.ContextUserInfo{
+		UserID: user.ID,
+	}
+
+	accessToken, refreshToken, err := auth.GenerateAccessTokenAndRefreshToken(contextUserInfo, database.RDB)
 	if err != nil {
 		logrus.Errorf("failed to generate access token and refresh token: %v", err)
 		return nil, err

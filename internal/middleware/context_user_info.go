@@ -8,26 +8,21 @@ import (
 	"errors"
 
 	"github.com/gin-gonic/gin"
+	"go-gin-api-starter/pkg/auth"
 )
-
-// ContextUserInfo
-// @Description: userinfo in context, update the fields according to the actual project
-type ContextUserInfo struct {
-	UserID uint64
-}
 
 // GetContextUserInfo
 // @Description: get userinfo from context and format it
 // @param c gin.Context
 // @return contextUserInfo formatted userinfo
 // @return err return when error, otherwise nil
-func GetContextUserInfo(c *gin.Context) (contextUserInfo ContextUserInfo, exists bool, err error) {
+func GetContextUserInfo(c *gin.Context) (contextUserInfo auth.ContextUserInfo, exists bool, err error) {
 	userInfoInterface, exists := c.Get("userInfo")
 	if !exists {
 		return
 	}
 
-	contextUserInfo, ok := userInfoInterface.(ContextUserInfo)
+	contextUserInfo, ok := userInfoInterface.(auth.ContextUserInfo)
 	if !ok {
 		err = errors.New("failed to convert contextUserInfo format")
 		return

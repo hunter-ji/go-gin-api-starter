@@ -61,7 +61,7 @@ func respondWithError(c *gin.Context, statusCode int, message string) {
 // @return string new access token if token is expired
 // @return bool true if token is expired
 // @return error
-func validateToken(c *gin.Context) (*ContextUserInfo, string, bool, error) {
+func validateToken(c *gin.Context) (*auth.ContextUserInfo, string, bool, error) {
 	// Get the Authorization header
 	authHeader := c.GetHeader("Authorization")
 
@@ -83,10 +83,7 @@ func validateToken(c *gin.Context) (*ContextUserInfo, string, bool, error) {
 		return nil, "", expired, err
 	}
 
-	var userInfo ContextUserInfo
-	userInfo.UserID = claims.UserID
-
-	return &userInfo, newAccessToken, false, nil
+	return &claims.ContextUserInfo, newAccessToken, false, nil
 }
 
 // authorize
