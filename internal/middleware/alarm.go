@@ -6,12 +6,12 @@ package middleware
 
 import (
 	"encoding/json"
-	"fmt"
 	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"go-gin-api-starter/config"
 )
 
@@ -88,11 +88,11 @@ func alarm(level string, str string, skip int) {
 
 	messageJson, errs := json.Marshal(msg)
 	if errs != nil {
-		fmt.Println("json marshal error:", errs)
+		logrus.Errorf("json marshal error: %v", errs)
 	}
 
 	errorJsonInfo := string(messageJson)
-	fmt.Println(errorJsonInfo)
+	logrus.Error(errorJsonInfo)
 
 	if level == "INFO" {
 		// do something

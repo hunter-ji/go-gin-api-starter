@@ -239,6 +239,11 @@ func RefreshToken(refreshToken string, redisClient *redis.Client) (string, strin
 
 	userID := claims.UserID
 
+	// Validate stored refresh token
+	if !validateStoredRefreshToken(userID, refreshToken, redisClient) {
+		return "", "", errors.New("invalid refresh token")
+	}
+
 	// Check cache first
 	if cachedToken, ok := getTokenFromCache(userID); ok {
 		return cachedToken.accessToken, cachedToken.refreshToken, nil
@@ -253,11 +258,6 @@ func RefreshToken(refreshToken string, redisClient *redis.Client) (string, strin
 	// Check cache again after acquiring the lock
 	if cachedToken, ok := getTokenFromCache(userID); ok {
 		return cachedToken.accessToken, cachedToken.refreshToken, nil
-	}
-
-	// Validate stored refresh token
-	if !validateStoredRefreshToken(userID, refreshToken, redisClient) {
-		return "", "", errors.New("invalid refresh token")
 	}
 
 	// Generate new tokens

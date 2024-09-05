@@ -88,38 +88,36 @@ func TestUser(t *testing.T) {
 
 	assert.Equal(t, response.StatusOK, logoutResp.Code)
 
-	/*
-		// Test refresh token after logout
-		w, req = createRefreshTokenRequest(t, refreshTokenRequest)
+	// Test refresh token after logout
+	w, req = createRefreshTokenRequest(t, refreshTokenRequest)
 
-		router.ServeHTTP(w, req)
+	router.ServeHTTP(w, req)
 
-		assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 
-		err = parseResponse(w.Body.String(), &newLoginResp)
+	err = parseResponse(w.Body.String(), &newLoginResp)
 
-		assert.NoError(t, err)
+	assert.NoError(t, err)
 
-		assert.Equal(t, response.StatusUnauthorized, newLoginResp.Code)
+	assert.Equal(t, response.StatusErr, newLoginResp.Code)
 
-		// Test login with invalid password
-		loginRequest = model.LoginRequest{
-			AccountName: "hunter",
-			Password:    "hello",
-		}
+	// Test login with invalid password
+	loginRequest = model.LoginRequest{
+		AccountName: "hunter",
+		Password:    "hello",
+	}
 
-		w, req = createLoginRequest(t, loginRequest)
+	w, req = createLoginRequest(t, loginRequest)
 
-		router.ServeHTTP(w, req)
+	router.ServeHTTP(w, req)
 
-		assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusOK, w.Code)
 
-		err = parseResponse(w.Body.String(), &loginResp)
-		assert.NoError(t, err)
+	err = parseResponse(w.Body.String(), &loginResp)
 
-		assert.Equal(t, response.StatusUnauthorized, loginResp.Code)
+	assert.NoError(t, err)
 
-	*/
+	assert.Equal(t, response.StatusErr, loginResp.Code)
 }
 
 func createLoginRequest(t *testing.T, loginRequest model.LoginRequest) (*httptest.ResponseRecorder, *http.Request) {

@@ -65,8 +65,6 @@ func validateToken(c *gin.Context) (*ContextUserInfo, string, bool, error) {
 	// Get the Authorization header
 	authHeader := c.GetHeader("Authorization")
 
-	fmt.Printf("authHeader: %s\n", authHeader)
-
 	// Check if the header is empty
 	if authHeader == "" {
 		return nil, "", false, fmt.Errorf("failed to get access token")
@@ -117,7 +115,6 @@ func authorize() gin.HandlerFunc {
 
 			// Set user info in context
 			c.Set("userInfo", *userInfo)
-			fmt.Printf("userInfo: %v\n", userInfo)
 		}
 
 		c.Next()
